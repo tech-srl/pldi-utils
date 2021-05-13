@@ -63,11 +63,13 @@ if __name__ == '__main__':
     kmeans_late = KMeans(n_clusters=6, init='k-means++').fit(late_features)
 
     assignment_early = sorted(
-        [(label, pid, title, feat) for ((pid, title), _), label, feat in zip(paper_to_topics_list, kmeans_early.labels_, features)
-            if pid in early_session], key=lambda x: x[0])
+        [(label, pid, title, feat) for (pid, title, feat), label in
+                        zip([(pid, title, feat) for ((pid, title), _), feat in zip(paper_to_topics_list, features)
+                            if pid in early_session], kmeans_early.labels_)], key=lambda x: x[0])
     assignment_late = sorted(
-        [(label, pid, title, feat) for ((pid, title), _), label, feat in zip(paper_to_topics_list, kmeans_late.labels_, features)
-         if pid in late_session], key=lambda x: x[0])
+        [(label, pid, title, feat) for (pid, title, feat), label in
+                        zip([(pid, title, feat) for ((pid, title), _), feat in zip(paper_to_topics_list, features)
+                            if pid in (late_session + no_pref)], kmeans_late.labels_)], key=lambda x: x[0])
 
     print('Sessions at 13:00:')
     for label, pid, title, f in assignment_early:
@@ -78,4 +80,6 @@ if __name__ == '__main__':
     for label, pid, title, f in assignment_late:
         print(f'[{label}] {pid} "{title}" ({",".join(paper_to_topics[(pid,title)])})')
     print()
+    print(f'early: {len(assignment_early)}, late: {len(assignment_late)}')
+    print(f'Total: {len(assignment_late) + len(assignment_early)}')
 
